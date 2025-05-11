@@ -6,7 +6,7 @@
             <class name="testcases.CreateLead"/>
         </classes>
     </test>
-    <test name="FirefoxTest">
+    <test name="EdgeTest">
         <parameter name="browser" value="edge"/>
         <classes>
             <class name="testcases.CreateLead"/>

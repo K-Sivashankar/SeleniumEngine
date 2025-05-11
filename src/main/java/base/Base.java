@@ -7,10 +7,10 @@ import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
@@ -22,8 +22,8 @@ import static org.openqa.selenium.By.id;
 
 public class Base {
 
-    private static final ThreadLocal<RemoteWebDriver> remoteWebdriver = new ThreadLocal<RemoteWebDriver>();
-    private static final ThreadLocal<WebDriverWait> wait = new  ThreadLocal<WebDriverWait>();
+    static final ThreadLocal<RemoteWebDriver> remoteWebdriver = new ThreadLocal<RemoteWebDriver>();
+     static final ThreadLocal<WebDriverWait> wait = new  ThreadLocal<WebDriverWait>();
     public void setWait() {
         wait.set(new WebDriverWait(getDriver(), Duration.ofSeconds(20)));
     }
@@ -32,7 +32,7 @@ public class Base {
         return wait.get();
     }
 
-    public RemoteWebDriver  getDriver() {
+    public static RemoteWebDriver  getDriver() {
         return remoteWebdriver.get();
     }
 
@@ -109,11 +109,17 @@ public class Base {
 
 
     }
-    @AfterMethod
-    public void tearDown()
-    {
-        getDriver().quit();
+    @AfterMethod(alwaysRun = true)
+    public void tearDown(ITestResult result) {
+        if (getDriver() != null) {
+            if (result.getStatus() == ITestResult.SKIP || result.getStatus() == ITestResult.FAILURE ||result.getStatus() == ITestResult.SUCCESS) {
+                getDriver().quit();
+                remoteWebdriver.remove();  // clean ThreadLocal
+                wait.remove();             // clean ThreadLocal
+            }
+        }
     }
+
 
     public void click(By by) {
         WebElement element=null;
